@@ -6,4 +6,6 @@ function setLoading(el,on,text='Memuat...'){if(!el)return;el.textContent=text;el
 function isAdminSession(session){return !!(session?.user?.app_metadata?.role==='admin');}
 async function requireAdmin(){const {data:{session}}=await window.supabaseClient.auth.getSession();if(!session){location.replace('login.html');return null;}if(!isAdminSession(session)){await window.supabaseClient.auth.signOut();location.replace('login.html?error=unauthorized');return null;}return session;}
 async function logout(){await window.supabaseClient.auth.signOut();location.replace('login.html');}
-window.escapeHtml=escapeHtml;window.formatTanggalIndonesia=formatTanggalIndonesia;window.formatWaktu=formatWaktu;window.showMessage=showMessage;window.setLoading=setLoading;window.requireAdmin=requireAdmin;window.logout=logout;
+function markActiveNav(){const file=(location.pathname.split('/').pop()||'index.html');document.querySelectorAll('.nav a, .bottom-nav a').forEach(a=>{const href=(a.getAttribute('href')||'').split('?')[0];a.classList.toggle('active',href===file);});}
+document.addEventListener('DOMContentLoaded',markActiveNav);
+window.escapeHtml=escapeHtml;window.formatTanggalIndonesia=formatTanggalIndonesia;window.formatWaktu=formatWaktu;window.showMessage=showMessage;window.setLoading=setLoading;window.requireAdmin=requireAdmin;window.logout=logout;window.markActiveNav=markActiveNav;
