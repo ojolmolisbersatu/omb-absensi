@@ -204,3 +204,37 @@ details.advanced .form-grid{padding-bottom:12px}
   .hero h1{font-size:28px}
   .map-box{height:300px}
 }
+
+/* ---------- Member absensi page ---------- */
+.step-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;margin:12px 0;box-shadow:var(--shadow-sm)}
+.step-card h3{margin:0 0 4px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.step-card .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--brand-soft);color:var(--brand-dark);font-size:12px;font-weight:800}
+.step-card.done{border-color:var(--brand)}
+.step-desc{margin:0 0 12px;color:var(--muted);font-size:12.5px}
+.search-results{display:grid;gap:8px;max-height:260px;overflow-y:auto;margin-top:8px}
+.member-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);cursor:pointer;background:var(--surface-2)}
+.member-item.selected{border-color:var(--brand);background:var(--brand-soft)}
+.member-item .id{font-size:11px;color:var(--muted)}
+.picked-member{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:var(--radius-sm);background:var(--brand-soft);color:var(--brand-dark);font-weight:700;font-size:13.5px}
+.picked-member button{background:transparent;color:var(--brand-dark);padding:4px 8px}
+.gps-result{display:grid;gap:6px;margin-top:10px;font-size:13px}
+.gps-result .valid{color:var(--brand-dark);font-weight:800}
+.gps-result .invalid{color:var(--danger);font-weight:800}
+.photo-preview{width:100%;max-width:260px;border-radius:var(--radius-md);margin-top:10px;display:block;border:1.5px solid var(--line)}
+.pulse{animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* ---------- QR modal ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,18,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal-box{background:#fff;border-radius:var(--radius-lg);padding:22px;max-width:320px;width:100%;text-align:center;box-shadow:var(--shadow-lg)}
+.modal-box canvas{max-width:100%;height:auto;margin:12px auto}
+.modal-box .link-text{font-size:11px;word-break:break-all;color:var(--muted);background:var(--surface-2);padding:8px;border-radius:8px;margin:10px 0}
+
+/* ---------- Attendance table (admin) ---------- */
+.att-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.att-table th,.att-table td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.att-table th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase}
+.att-table img.thumb{width:34px;height:34px;border-radius:8px;object-fit:cover}
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface)}
+.filters-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.filters-bar select,.filters-bar input{padding:9px 11px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font:inherit;font-size:13px}
