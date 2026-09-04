@@ -1,0 +1,47 @@
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Absensi | OMB</title>
+<link rel="stylesheet" href="css/style.css"></head><body>
+
+<header class="topbar"><div class="topbar-inner">
+<div class="brand">⚡ OMB <small>ABSENSI KEHADIRAN</small></div>
+</div></header>
+
+<main class="container">
+<section class="hero"><h1 id="eventTitle">Memuat sesi...</h1><p id="eventSub"></p></section>
+<div id="message" class="notice hidden"></div>
+<div id="sessionClosed" class="notice error hidden">Sesi absensi ini tidak aktif atau sudah ditutup.</div>
+
+<div id="formArea" class="hidden">
+
+  <div class="step-card" id="stepMember">
+    <h3><span class="step-num">1</span> Cari Nama Anda</h3>
+    <p class="step-desc">Ketik nama atau ID anggota untuk mencari data Anda di database OMB.</p>
+    <input id="memberSearch" placeholder="Ketik nama atau ID anggota...">
+    <div id="searchResults" class="search-results"></div>
+    <div id="pickedMemberBox"></div>
+  </div>
+
+  <div class="step-card" id="stepLocation">
+    <h3><span class="step-num">2</span> Verifikasi Lokasi GPS</h3>
+    <p class="step-desc">Lokasi Anda akan dicocokkan dengan titik & radius absensi yang ditentukan admin.</p>
+    <button type="button" id="checkLocationBtn" class="btn secondary full">📍 Aktifkan GPS &amp; Cek Lokasi</button>
+    <div id="gpsResult" class="gps-result hidden"></div>
+  </div>
+
+  <div class="step-card" id="stepPhoto">
+    <h3><span class="step-num">3</span> Foto Wajah</h3>
+    <p class="step-desc">Ambil foto wajah Anda sebagai bukti kehadiran.</p>
+    <input id="photoInput" type="file" accept="image/*" capture="user">
+    <img id="photoPreview" class="photo-preview hidden">
+  </div>
+
+  <button id="submitBtn" class="full" type="button" disabled>KIRIM ABSENSI</button>
+</div>
+
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/drive-upload.js"></script>
+<script src="js/member.js"></script>
+</body></html>
