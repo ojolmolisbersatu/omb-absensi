@@ -65,7 +65,7 @@ async function loadActiveSessionList() {
     .from('event_sessions')
     .select('*')
     .eq('status', 'active')
-    .order('start_at');
+    .order('start_time');
 
   if (error) {
     $('activeSessionList').innerHTML = `<div class="empty">Gagal memuat sesi aktif: ${escapeHtml(error.message)}</div>`;
