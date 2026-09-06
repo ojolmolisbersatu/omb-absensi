@@ -28,7 +28,7 @@ function updateSubmitState() {
 async function loadSession() {
   const sessionId = new URLSearchParams(location.search).get('session');
   if (!sessionId) {
-    showMessage($('message'), 'Link tidak valid: session tidak ditemukan.', 'error');
+    await loadActiveSessionList();
     return;
   }
   const { data: session, error: err1 } = await supabaseClient
@@ -54,6 +54,42 @@ async function loadSession() {
     return;
   }
   $('formArea').classList.remove('hidden');
+}
+
+async function loadActiveSessionList() {
+  $('eventTitle').textContent = 'Absensi OMB';
+  $('eventSub').textContent = 'Pilih sesi yang sedang berlangsung untuk melakukan absensi.';
+  $('sessionPicker').classList.remove('hidden');
+
+  const { data: sessionsData, error } = await supabaseClient
+    .from('event_sessions')
+    .select('*')
+    .eq('status', 'active')
+    .order('start_at');
+
+  if (error) {
+    $('activeSessionList').innerHTML = `<div class="empty">Gagal memuat sesi aktif: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  if (!sessionsData || !sessionsData.length) {
+    $('activeSessionList').innerHTML = '<div class="empty">Tidak ada sesi absensi yang aktif saat ini.</div>';
+    return;
+  }
+
+  const eventIds = [...new Set(sessionsData.map((s) => s.event_id))];
+  const { data: eventsData } = await supabaseClient.from('events').select('*').in('id', eventIds);
+  const eventMap = {};
+  (eventsData || []).forEach((e) => (eventMap[e.id] = e));
+
+  $('activeSessionList').innerHTML = sessionsData
+    .map((s) => {
+      const ev = eventMap[s.event_id];
+      return `<div class="member-item" onclick="location.href='?session=${s.id}'">
+        <span>${escapeHtml(ev ? ev.name : 'Event')} — ${escapeHtml(s.name)}</span>
+        <span class="id">${escapeHtml(s.location_name || '-')}</span>
+      </div>`;
+    })
+    .join('');
 }
 
 async function searchMember(q) {
