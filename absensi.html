@@ -10,6 +10,11 @@
 <div id="message" class="notice hidden"></div>
 <div id="sessionClosed" class="notice error hidden">Sesi absensi ini tidak aktif atau sudah ditutup.</div>
 
+<div id="sessionPicker" class="hidden">
+  <p class="step-desc">Pilih sesi absensi yang sedang berlangsung:</p>
+  <div id="activeSessionList" class="loading">Memuat sesi aktif...</div>
+</div>
+
 <div id="formArea" class="hidden">
 
   <div class="step-card" id="stepMember">
@@ -36,6 +41,8 @@
 
   <button id="submitBtn" class="full" type="button" disabled>KIRIM ABSENSI</button>
 </div>
+
+<p style="text-align:center;margin-top:30px"><a href="admin/login.html" class="small">Admin Login</a></p>
 
 </main>
 
