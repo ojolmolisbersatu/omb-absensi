@@ -238,18 +238,3 @@ details.advanced .form-grid{padding-bottom:12px}
 .table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface)}
 .filters-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .filters-bar select,.filters-bar input{padding:9px 11px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font:inherit;font-size:13px}
-
-/* --- TAMBAHAN CSS VERMUK SAJA --- */
-.vermuk-card { max-width: 320px; margin: 0 auto; text-align: center; }
-.vermuk-instruction { font-size: 14px; font-weight: bold; margin-bottom: 10px; }
-.vermuk-frame-wrapper { display: flex; justify-content: center; }
-.vermuk-frame { width: 200px; height: 200px; border-radius: 50%; border: 4px solid #ef4444; overflow: hidden; position: relative; background: #000; }
-.vermuk-frame video, .vermuk-frame img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-.vermuk-frame.status-red { border-color: #ef4444; }
-.vermuk-frame.status-yellow { border-color: #f59e0b; }
-.vermuk-frame.status-green { border-color: #10b981; }
-.vermuk-feedback { font-weight: bold; margin-top: 10px; font-size: 14px; }
-.status-text-red { color: #dc2626; }
-.status-text-yellow { color: #d97706; }
-.status-text-green { color: #059669; }
-
