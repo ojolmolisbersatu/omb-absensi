@@ -16,14 +16,21 @@ body {
 }
 
 .container, .admin-container {
+  max-width: 1000px;
+  margin: 20px auto;
   background-color: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   padding: 24px;
 }
 
+h2, h3 {
+  color: #1f2937;
+  margin-bottom: 16px;
+}
+
 /* ==========================================================================
-   2. FORM & BUTTON COMPONENTS
+   2. FORM, INPUT & BUTTON COMPONENTS (ADMIN & MEMBER)
    ========================================================================== */
 .form-group {
   margin-bottom: 16px;
@@ -36,19 +43,35 @@ body {
   color: #4b5563;
 }
 
-.form-control, input[type="text"], input[type="number"], input[type="datetime-local"], select {
+.form-control, 
+input[type="text"], 
+input[type="number"], 
+input[type="datetime-local"], 
+select {
   width: 100%;
   padding: 10px 14px;
   font-size: 0.95rem;
   border: 1px solid #d1d5db;
   border-radius: 8px;
   outline: none;
+  background-color: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-control:focus, input:focus, select:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.form-row > div {
+  flex: 1;
+  min-width: 200px;
 }
 
 .btn-primary {
@@ -72,8 +95,57 @@ body {
   cursor: not-allowed;
 }
 
+.btn-secondary {
+  background-color: #4b5563;
+  color: #ffffff;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-secondary:hover {
+  background-color: #374151;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
 /* ==========================================================================
-   3. VERMUK CAMERA CARD (UI VERIFIKASI WAJAH)
+   3. ADMIN MAP STYLING (LEAFLET MAP INTEGRATION)
+   ========================================================================== */
+.map-container {
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid #d1d5db;
+}
+
+#adminMap {
+  width: 100%;
+  height: 320px;
+  z-index: 1;
+}
+
+.map-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* ==========================================================================
+   4. VERMUK CAMERA CARD (UI MEMBER)
    ========================================================================== */
 .vermuk-card {
   max-width: 360px;
@@ -100,45 +172,29 @@ body {
   margin-bottom: 16px;
 }
 
-/* Frame Lingkaran Kamera */
 .vermuk-frame {
   width: 220px;
   height: 220px;
   border-radius: 50%;
-  border: 5px solid #ef4444; /* Default Merah */
+  border: 5px solid #ef4444;
   overflow: hidden;
   position: relative;
   box-sizing: border-box;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  transition: border-color 0.3s ease;
   background-color: #000000;
 }
 
-/* Mirroring video & foto hasil agar terlihat alami */
-.vermuk-frame video,
-.vermuk-frame img {
+.vermuk-frame video, .vermuk-frame img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transform: scaleX(-1);
 }
 
-/* Indikator Status Warna Frame */
-.vermuk-frame.status-red {
-  border-color: #ef4444;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.3);
-}
+.vermuk-frame.status-red { border-color: #ef4444; }
+.vermuk-frame.status-yellow { border-color: #f59e0b; }
+.vermuk-frame.status-green { border-color: #10b981; }
 
-.vermuk-frame.status-yellow {
-  border-color: #f59e0b;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
-}
-
-.vermuk-frame.status-green {
-  border-color: #10b981;
-  box-shadow: 0 0 16px rgba(16, 185, 129, 0.4);
-}
-
-/* Feedback Text Status Real-time */
 .vermuk-feedback {
   font-size: 0.9rem;
   font-weight: 600;
@@ -150,34 +206,18 @@ body {
 .status-text-yellow { color: #d97706; }
 .status-text-green { color: #059669; }
 
-/* Tombol Foto Ulang */
-.vermuk-actions {
-  margin-top: 12px;
-}
-
-.btn-retake {
-  background-color: #4b5563;
-  color: #ffffff;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.btn-retake:hover {
-  background-color: #374151;
-}
-
 /* ==========================================================================
-   4. ADMIN TABLE & UTILITIES
+   5. ADMIN TABLES & REKAP LAPORAN
    ========================================================================== */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
   background-color: #ffffff;
 }
 
@@ -185,6 +225,7 @@ th, td {
   padding: 12px 14px;
   text-align: left;
   border-bottom: 1px solid #e5e7eb;
+  font-size: 0.9rem;
 }
 
 th {
@@ -195,4 +236,12 @@ th {
 
 tr:hover {
   background-color: #f3f4f6;
+}
+
+.img-thumbnail {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #10b981;
 }
