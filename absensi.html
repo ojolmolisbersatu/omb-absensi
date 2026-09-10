@@ -1,76 +1,46 @@
-<!doctype html>
-<html lang="id">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Absensi | OMB</title>
-  <link rel="stylesheet" href="css/style.css">
-  
-  <!-- Tambahan: Library MediaPipe untuk Deteksi Wajah -->
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js" crossorigin="anonymous"></script>
-</head>
-<body>
+<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Absensi | OMB</title>
+<link rel="stylesheet" href="css/style.css"></head><body>
 
-<header class="topbar">
-  <div class="topbar-inner">
-    <div class="brand">⚡ OMB <small>ABSENSI KEHADIRAN</small></div>
-  </div>
-</header>
+<header class="topbar"><div class="topbar-inner">
+<div class="brand">⚡ OMB <small>ABSENSI KEHADIRAN</small></div>
+</div></header>
 
 <main class="container">
-  <section class="hero">
-    <h1 id="eventTitle">Memuat sesi...</h1>
-    <p id="eventSub"></p>
-  </section>
-  
-  <div id="message" class="notice hidden"></div>
-  <div id="sessionClosed" class="notice error hidden">Sesi absensi ini tidak aktif atau sudah ditutup.</div>
+<section class="hero"><h1 id="eventTitle">Memuat sesi...</h1><p id="eventSub"></p></section>
+<div id="message" class="notice hidden"></div>
+<div id="sessionClosed" class="notice error hidden">Sesi absensi ini tidak aktif atau sudah ditutup.</div>
 
-  <div id="sessionPicker" class="hidden">
-    <p class="step-desc">Pilih sesi absensi yang sedang berlangsung:</p>
-    <div id="activeSessionList" class="loading">Memuat sesi aktif...</div>
+<div id="sessionPicker" class="hidden">
+  <p class="step-desc">Pilih sesi absensi yang sedang berlangsung:</p>
+  <div id="activeSessionList" class="loading">Memuat sesi aktif...</div>
+</div>
+
+<div id="formArea" class="hidden">
+
+  <div class="step-card" id="stepMember">
+    <h3><span class="step-num">1</span> Cari Nama Anda</h3>
+    <p class="step-desc">Ketik nama atau ID anggota untuk mencari data Anda di database OMB.</p>
+    <input id="memberSearch" placeholder="Ketik nama atau ID anggota...">
+    <div id="searchResults" class="search-results"></div>
+    <div id="pickedMemberBox"></div>
   </div>
 
-  <div id="formArea" class="hidden">
-
-    <div class="step-card" id="stepMember">
-      <h3><span class="step-num">1</span> Cari Nama Anda</h3>
-      <p class="step-desc"></p>
-      <input id="memberSearch" placeholder="Ketik nama atau ID anggota...">
-      <div id="searchResults" class="search-results"></div>
-      <div id="pickedMemberBox"></div>
-    </div>
-
-    <div class="step-card" id="stepLocation">
-      <h3><span class="step-num">2</span> Verifikasi Lokasi GPS</h3>
-      <p class="step-desc"></p>
-      <button type="button" id="checkLocationBtn" class="btn secondary full">📍 Aktifkan GPS &amp; Cek Lokasi</button>
-      <div id="gpsResult" class="gps-result hidden"></div>
-    </div>
-
-    <!-- REVISI: Bagian Input Foto Diganti Menjadi UI Vermuk -->
-    <div class="step-card" id="stepPhoto">
-      <h3><span class="step-num">3</span> Foto Wajah</h3>
-      <p class="step-desc">Posisikan wajah Anda di dalam lingkaran hingga indikator berwarna hijau.</p>
-      
-      <div class="vermuk-card">
-        <p class="vermuk-instruction">Pegang HP Anda dengan tegak</p>
-        <div class="vermuk-frame-wrapper">
-          <div id="vermukFrame" class="vermuk-frame status-red">
-            <video id="vermukVideo" autoplay playsinline muted></video>
-            <img id="vermukResult" class="photo-preview" style="display: none;" />
-          </div>
-        </div>
-        <div id="vermukFeedback" class="vermuk-feedback status-text-red">Mempersiapkan kamera...</div>
-        <canvas id="vermukCanvas" style="display: none;"></canvas>
-        <button type="button" id="btnRetake" class="btn secondary" style="display: none; margin-top: 10px;">Foto Ulang</button>
-      </div>
-    </div>
-    <!-- END REVISI -->
-
-    <button id="submitBtn" class="full" type="button" disabled>KIRIM ABSENSI</button>
+  <div class="step-card" id="stepLocation">
+    <h3><span class="step-num">2</span> Verifikasi Lokasi GPS</h3>
+    <p class="step-desc">Lokasi Anda akan dicocokkan dengan titik & radius absensi yang ditentukan admin.</p>
+    <button type="button" id="checkLocationBtn" class="btn secondary full">📍 Aktifkan GPS &amp; Cek Lokasi</button>
+    <div id="gpsResult" class="gps-result hidden"></div>
   </div>
+
+  <div class="step-card" id="stepPhoto">
+    <h3><span class="step-num">3</span> Foto Wajah</h3>
+    <p class="step-desc">Ambil foto wajah Anda sebagai bukti kehadiran.</p>
+    <input id="photoInput" type="file" accept="image/*" capture="user">
+    <img id="photoPreview" class="photo-preview hidden">
+  </div>
+
+  <button id="submitBtn" class="full" type="button" disabled>KIRIM ABSENSI</button>
+</div>
 
 </main>
 
@@ -79,7 +49,4 @@
 <script src="js/auth.js"></script>
 <script src="js/drive-upload.js"></script>
 <script src="js/member.js"></script>
-<!-- Tambahan: Script Logika Kamera Vermuk -->
-<script src="js/vermuk-camera.js"></script>
-</body>
-</html>
+</body></html>
