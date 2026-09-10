@@ -1,96 +1,70 @@
-const $ = (id) => document.getElementById(id);
-let allRows = [];
-let sessionId = null;
-
-function statusBadge(row) {
-  return row.location_valid
-    ? '<span class="badge active">VALID</span>'
-    : '<span class="badge cancelled">TIDAK VALID</span>';
-}
-
-function renderRows() {
-  const validFilter = $('filterValid').value;
-  const q = $('filterSearch').value.trim().toLowerCase();
-  const rows = allRows.filter((r) => {
-    if (validFilter === 'valid' && !r.location_valid) return false;
-    if (validFilter === 'invalid' && r.location_valid) return false;
-    if (q && !String(r.member_id).toLowerCase().includes(q)) return false;
-    return true;
-  });
-
-  $('attBody').innerHTML = rows.length
-    ? rows
-        .map(
-          (r) => `<tr>
-            <td>${r.photo_drive_url ? `<a href="${escapeHtml(r.photo_drive_url)}" target="_blank"><img class="thumb" src="${escapeHtml(r.photo_drive_url)}" alt="foto"></a>` : '-'}</td>
-            <td>${escapeHtml(r.member_id)}</td>
-            <td>${new Date(r.attendance_time).toLocaleString('id-ID')}</td>
-            <td>${r.distance_meter != null ? Math.round(r.distance_meter) : '-'}</td>
-            <td>${r.gps_accuracy != null ? '± ' + Math.round(r.gps_accuracy) + ' m' : '-'}</td>
-            <td>${statusBadge(r)}</td>
-            <td>${escapeHtml(r.status || '-')}</td>
-          </tr>`
-        )
-        .join('')
-    : '<tr><td colspan="7" class="empty">Tidak ada data.</td></tr>';
-}
-
-function updateStats() {
-  $('statTotal').textContent = allRows.length;
-  $('statValid').textContent = allRows.filter((r) => r.location_valid).length;
-  $('statInvalid').textContent = allRows.filter((r) => !r.location_valid).length;
-  $('statUnique').textContent = new Set(allRows.map((r) => r.member_id)).size;
-}
-
-function exportCsv() {
-  const headers = ['member_id', 'attendance_time', 'latitude', 'longitude', 'distance_meter', 'gps_accuracy', 'location_valid', 'status', 'photo_drive_url'];
-  const lines = [headers.join(',')];
-  allRows.forEach((r) => {
-    const row = headers.map((h) => {
-      const v = r[h] ?? '';
-      return `"${String(v).replace(/"/g, '""')}"`;
-    });
-    lines.push(row.join(','));
-  });
-  const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `absensi-${sessionId}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
-  if (!(await requireAdmin())) return;
-  sessionId = new URLSearchParams(location.search).get('session');
-  if (!sessionId) {
-    showMessage($('message'), 'Session ID tidak ditemukan. Buka halaman ini melalui Session Manager.');
-    return;
-  }
+  await loadEventFilter();
+  await loadAttendanceData();
 
-  const { data: session } = await supabaseClient.from('event_sessions').select('*').eq('id', sessionId).single();
-  if (session) {
-    $('sessionInfo').textContent = `${session.name} · ${session.location_name || '-'}`;
-  }
+  document.getElementById('filterEvent').addEventListener('change', loadAttendanceData);
+});
 
-  const { data, error } = await supabaseClient
+// Dropdown filter Event di Laporan Admin
+async function loadEventFilter() {
+  const select = document.getElementById('filterEvent');
+  const { data: events } = await supabase.from('events').select('id, title, name');
+
+  if (events) {
+    select.innerHTML = '<option value="">-- Semua Event --</option>' +
+      events.map(e => `<option value="${e.id}">${e.title || e.name}</option>`).join('');
+  }
+}
+
+// Fetch Rekap Absensi
+async function loadAttendanceData() {
+  const tbody = document.getElementById('attendanceTableBody');
+  const selectedEventId = document.getElementById('filterEvent').value;
+
+  let query = supabase
     .from('attendance')
-    .select('*')
-    .eq('session_id', sessionId)
-    .order('attendance_time', { ascending: false });
+    .select(`
+      id,
+      created_at,
+      photo_url,
+      latitude,
+      longitude,
+      events ( title, name ),
+      users ( email, raw_user_meta_data )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (selectedEventId) {
+    query = query.eq('event_id', selectedEventId);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
-    showMessage($('message'), 'Gagal memuat data kehadiran: ' + error.message, 'error');
-    $('attBody').innerHTML = '<tr><td colspan="7" class="empty">Gagal memuat data.</td></tr>';
+    tbody.innerHTML = `<tr><td colspan="5">Gagal memuat rekap: ${error.message}</td></tr>`;
     return;
   }
 
-  allRows = data || [];
-  updateStats();
-  renderRows();
+  if (!data || data.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Belum ada data presensi.</td></tr>';
+    return;
+  }
 
-  $('filterValid').addEventListener('change', renderRows);
-  $('filterSearch').addEventListener('input', renderRows);
-  $('exportBtn').addEventListener('click', exportCsv);
-});
+  tbody.innerHTML = data.map(row => {
+    const userEmail = row.users?.email || 'N/A';
+    const eventName = row.events?.title || row.events?.name || 'N/A';
+    const photoSrc = row.photo_url || '';
+
+    return `
+      <tr>
+        <td>${userEmail}</td>
+        <td>${eventName}</td>
+        <td>${new Date(row.created_at).toLocaleString()}</td>
+        <td>
+          ${photoSrc ? `<img src="${photoSrc}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 50%; border: 2px solid #10b981;" alt="Foto Presensi"/>` : 'Tidak Ada Foto'}
+        </td>
+        <td>${row.latitude && row.longitude ? `${row.latitude.toFixed(4)}, ${row.longitude.toFixed(4)}` : 'N/A'}</td>
+      </tr>
+    `;
+  }).join('');
+}
