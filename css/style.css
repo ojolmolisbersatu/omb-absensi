@@ -1,247 +1,255 @@
 /* ==========================================================================
-   1. RESET & GLOBAL STYLES
+   OMB ABSENSI V1 — Design System
    ========================================================================== */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --bg:#f3f6f7;
+  --surface:#ffffff;
+  --surface-2:#f7fafb;
+  --ink:#151c22;
+  --muted:#69757e;
+  --muted-2:#8b969e;
+  --line:#e5eaed;
+  --brand:#00a878;
+  --brand-dark:#0a7a56;
+  --brand-darker:#0c5a41;
+  --brand-soft:#e2f7ee;
+  --danger:#e5484d;
+  --danger-soft:#fdeaea;
+  --warn:#c9820a;
+  --warn-soft:#fff3dc;
+  --radius-sm:10px;
+  --radius-md:14px;
+  --radius-lg:20px;
+  --shadow-sm:0 1px 3px rgba(15,23,31,.06),0 1px 2px rgba(15,23,31,.04);
+  --shadow-md:0 10px 28px rgba(13,25,22,.10);
+  --shadow-lg:0 20px 50px rgba(10,20,18,.18);
+  --nav-h:64px;
+  --bottomnav-h:66px;
+}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Helvetica,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--ink);
+  -webkit-font-smoothing:antialiased;
+  padding-bottom:calc(var(--bottomnav-h) + 12px);
+}
+a{text-decoration:none;color:inherit}
+h1,h2,h3{line-height:1.25}
+::selection{background:var(--brand-soft)}
+
+.container{width:min(100%,1080px);margin:0 auto;padding:16px}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:30;
+  background:linear-gradient(180deg,var(--brand-darker),#0a4a37);
+  color:#fff;
+  box-shadow:0 2px 12px rgba(4,20,16,.18);
+}
+.topbar-inner{
+  width:min(100%,1080px);margin:0 auto;padding:0 16px;height:var(--nav-h);
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.brand{display:flex;align-items:baseline;gap:8px;font-weight:800;font-size:17px;letter-spacing:.2px}
+.brand small{font-size:10px;font-weight:700;letter-spacing:.6px;color:#a9dcc6;text-transform:uppercase}
+.nav{display:flex;align-items:center;gap:4px}
+.nav a,.nav button{
+  border:0;background:transparent;color:#e9fbf3;padding:9px 14px;border-radius:10px;
+  font:600 13.5px inherit;cursor:pointer;transition:background .15s ease;
+}
+.nav a.active{background:rgba(255,255,255,.16);color:#fff}
+.nav a:hover,.nav button:hover{background:rgba(255,255,255,.12)}
+.nav-logout-mobile{
+  display:none;border:0;background:rgba(255,255,255,.12);color:#fff;
+  width:38px;height:38px;border-radius:12px;font-size:16px;cursor:pointer;
 }
 
-body {
-  background-color: #f4f6f9;
-  color: #333333;
-  line-height: 1.5;
-  padding: 16px;
+/* ---------- Bottom nav (mobile) ---------- */
+.bottom-nav{
+  display:none;
 }
 
-.container, .admin-container {
-  max-width: 1000px;
-  margin: 20px auto;
-  background-color: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 24px;
+/* ---------- Hero / headings ---------- */
+.hero{padding:22px 0 6px}
+.hero h1{margin:0 0 4px;font-size:22px;font-weight:800}
+.hero p{margin:0;color:var(--muted);font-size:14px}
+
+/* ---------- Stats grid ---------- */
+.grid-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin:16px 0}
+.stat{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:16px;box-shadow:var(--shadow-sm);
+}
+.stat span{font-size:12px;color:var(--muted);font-weight:600}
+.stat b{display:block;font-size:26px;margin-top:6px;font-weight:800;letter-spacing:-.5px}
+
+/* ---------- Cards ---------- */
+.card{
+  background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);
+  padding:18px;margin:12px 0;box-shadow:var(--shadow-sm);
+}
+.card h3{margin:0 0 6px;font-size:16px;font-weight:700}
+.meta{color:var(--muted);font-size:13px;line-height:1.75}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.section-title{margin:26px 0 10px;font-size:16px;font-weight:800}
+
+/* ---------- Buttons ---------- */
+button,.btn{
+  border:0;border-radius:var(--radius-sm);padding:11px 16px;font:700 13.5px inherit;
+  cursor:pointer;background:var(--brand);color:#fff;transition:transform .06s ease,opacity .15s ease;
+  display:inline-flex;align-items:center;justify-content:center;gap:6px;
+}
+button:active,.btn:active{transform:scale(.98)}
+.btn.secondary,button.secondary{background:var(--surface-2);color:var(--ink);border:1px solid var(--line)}
+.btn.warning,button.warning{background:var(--warn-soft);color:var(--warn)}
+.btn.danger,button.danger{background:var(--danger-soft);color:var(--danger)}
+button.danger:hover{opacity:.85}
+button:disabled{opacity:.55;cursor:not-allowed}
+.btn.full,button.full{width:100%}
+
+/* ---------- Badges ---------- */
+.badge{display:inline-block;padding:5px 10px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.5px}
+.badge.draft{background:#eef1f3;color:#576169}
+.badge.active{background:var(--brand-soft);color:var(--brand-dark)}
+.badge.closed{background:var(--warn-soft);color:var(--warn)}
+.badge.cancelled{background:var(--danger-soft);color:var(--danger)}
+
+/* ---------- Forms ---------- */
+.form-grid{display:grid;gap:14px}
+.field{display:grid;gap:6px}
+.field label{font-size:12.5px;font-weight:700;color:var(--ink)}
+.field input,.field textarea,.field select{
+  width:100%;padding:12px 13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  background:var(--surface-2);font:inherit;font-size:14.5px;color:var(--ink);
+  transition:border-color .15s ease,background .15s ease;
+}
+.field input:focus,.field textarea:focus,.field select:focus{
+  outline:none;border-color:var(--brand);background:var(--surface);
+}
+textarea{min-height:88px;resize:vertical}
+
+/* ---------- Location picker ---------- */
+.location-picker{display:grid;gap:10px;margin:4px 0}
+.map-box{
+  width:100%;height:240px;border-radius:var(--radius-md);overflow:hidden;
+  border:1.5px solid var(--line);background:var(--surface-2);
+}
+.hint{margin:0;font-size:12px;color:var(--muted-2)}
+
+/* ---------- Radius chips ---------- */
+.chip-group{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.chip{
+  border:1.5px solid var(--line);background:var(--surface-2);color:var(--ink);
+  padding:9px 14px;border-radius:999px;font:700 13px inherit;cursor:pointer;
+}
+.chip.active{background:var(--brand);border-color:var(--brand);color:#fff}
+
+/* ---------- Advanced / details ---------- */
+details.advanced{
+  border:1.5px dashed var(--line);border-radius:var(--radius-md);padding:4px 14px;background:var(--surface-2);
+}
+details.advanced summary{cursor:pointer;padding:10px 0;font-size:13px;font-weight:700;color:var(--muted)}
+details.advanced[open] summary{color:var(--ink)}
+details.advanced .form-grid{padding-bottom:12px}
+
+/* ---------- Notices ---------- */
+.notice{padding:12px 14px;border-radius:var(--radius-sm);margin:10px 0;font-size:13.5px;font-weight:600}
+.notice.error{background:var(--danger-soft);color:#a92326}
+.notice.success{background:var(--brand-soft);color:var(--brand-dark)}
+.loading{padding:26px;text-align:center;color:var(--muted);font-size:13.5px}
+.empty{text-align:center;color:var(--muted);padding:34px;font-size:13.5px}
+.hidden{display:none!important}
+.small{font-size:12px;color:var(--muted)}
+
+/* ---------- Login page ---------- */
+.login-page{
+  min-height:100vh;display:grid;place-items:center;padding:20px;
+  background:radial-gradient(circle at 20% 15%,#0c5a41,#0a2b22 70%);
+  padding-bottom:20px;
+}
+.login-box{
+  width:min(100%,420px);background:var(--surface);padding:28px 24px;
+  border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);
+}
+.login-logo{text-align:center;margin-bottom:22px}
+.login-logo h1{margin:0;font-size:26px}
+.login-logo p{color:var(--muted);font-size:12px;font-weight:700;letter-spacing:.6px;margin-top:4px}
+
+/* ---------- Responsive ---------- */
+@media (max-width:700px){
+  .nav-desktop{display:none}
+  .nav-logout-mobile{display:inline-flex;align-items:center;justify-content:center}
+  .bottom-nav{
+    display:flex;position:fixed;left:0;right:0;bottom:0;z-index:30;height:var(--bottomnav-h);
+    background:var(--surface);border-top:1px solid var(--line);
+    box-shadow:0 -6px 20px rgba(15,23,31,.08);
+    padding:6px 10px calc(6px + env(safe-area-inset-bottom));
+  }
+  .bottom-nav a,.bottom-nav button{
+    flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    border:0;background:transparent;color:var(--muted);font:700 10.5px inherit;padding:4px;border-radius:12px;
+  }
+  .bottom-nav a .ic,.bottom-nav button .ic{font-size:19px;line-height:1}
+  .bottom-nav a.active{color:var(--brand-dark)}
+  .bottom-nav a.active .ic{filter:none}
+}
+@media (min-width:701px){
+  .grid-stats{grid-template-columns:repeat(4,1fr)}
+  .form-grid.two{grid-template-columns:repeat(2,1fr)}
+  .container{padding:26px 16px}
+  .hero h1{font-size:28px}
+  .map-box{height:300px}
 }
 
-h2, h3 {
-  color: #1f2937;
-  margin-bottom: 16px;
-}
+/* ---------- Member absensi page ---------- */
+.step-card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:18px;margin:12px 0;box-shadow:var(--shadow-sm)}
+.step-card h3{margin:0 0 4px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:8px}
+.step-card .step-num{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--brand-soft);color:var(--brand-dark);font-size:12px;font-weight:800}
+.step-card.done{border-color:var(--brand)}
+.step-desc{margin:0 0 12px;color:var(--muted);font-size:12.5px}
+.search-results{display:grid;gap:8px;max-height:260px;overflow-y:auto;margin-top:8px}
+.member-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 13px;border:1.5px solid var(--line);border-radius:var(--radius-sm);cursor:pointer;background:var(--surface-2)}
+.member-item.selected{border-color:var(--brand);background:var(--brand-soft)}
+.member-item .id{font-size:11px;color:var(--muted)}
+.picked-member{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-radius:var(--radius-sm);background:var(--brand-soft);color:var(--brand-dark);font-weight:700;font-size:13.5px}
+.picked-member button{background:transparent;color:var(--brand-dark);padding:4px 8px}
+.gps-result{display:grid;gap:6px;margin-top:10px;font-size:13px}
+.gps-result .valid{color:var(--brand-dark);font-weight:800}
+.gps-result .invalid{color:var(--danger);font-weight:800}
+.photo-preview{width:100%;max-width:260px;border-radius:var(--radius-md);margin-top:10px;display:block;border:1.5px solid var(--line)}
+.pulse{animation:pulse 1.4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-/* ==========================================================================
-   2. FORM, INPUT & BUTTON COMPONENTS (ADMIN & MEMBER)
-   ========================================================================== */
-.form-group {
-  margin-bottom: 16px;
-}
+/* ---------- QR modal ---------- */
+.modal-overlay{position:fixed;inset:0;background:rgba(10,20,18,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
+.modal-box{background:#fff;border-radius:var(--radius-lg);padding:22px;max-width:320px;width:100%;text-align:center;box-shadow:var(--shadow-lg)}
+.modal-box canvas{max-width:100%;height:auto;margin:12px auto}
+.modal-box .link-text{font-size:11px;word-break:break-all;color:var(--muted);background:var(--surface-2);padding:8px;border-radius:8px;margin:10px 0}
 
-.form-group label {
-  display: block;
-  font-weight: 600;
-  margin-bottom: 6px;
-  color: #4b5563;
-}
+/* ---------- Attendance table (admin) ---------- */
+.att-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.att-table th,.att-table td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.att-table th{color:var(--muted);font-weight:700;font-size:11px;text-transform:uppercase}
+.att-table img.thumb{width:34px;height:34px;border-radius:8px;object-fit:cover}
+.table-scroll{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius-md);background:var(--surface)}
+.filters-bar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.filters-bar select,.filters-bar input{padding:9px 11px;border:1.5px solid var(--line);border-radius:var(--radius-sm);font:inherit;font-size:13px}
 
-.form-control, 
-input[type="text"], 
-input[type="number"], 
-input[type="datetime-local"], 
-select {
-  width: 100%;
-  padding: 10px 14px;
-  font-size: 0.95rem;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  outline: none;
-  background-color: #ffffff;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.form-control:focus, input:focus, select:focus {
-  border-color: #2563eb;
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
-
-.form-row {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.form-row > div {
-  flex: 1;
-  min-width: 200px;
-}
-
-.btn-primary {
-  background-color: #2563eb;
-  color: #ffffff;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: #1d4ed8;
-}
-
-.btn-primary:disabled {
-  background-color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.btn-secondary {
-  background-color: #4b5563;
-  color: #ffffff;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn-secondary:hover {
-  background-color: #374151;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: #ffffff;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-/* ==========================================================================
-   3. ADMIN MAP STYLING (LEAFLET MAP INTEGRATION)
-   ========================================================================== */
-.map-container {
-  margin: 16px 0;
-  border-radius: 8px;
-  overflow: hidden;
-  border: 1px solid #d1d5db;
-}
-
-#adminMap {
-  width: 100%;
-  height: 320px;
-  z-index: 1;
-}
-
-.map-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-/* ==========================================================================
-   4. VERMUK CAMERA CARD (UI MEMBER)
-   ========================================================================== */
-.vermuk-card {
-  max-width: 360px;
-  margin: 16px auto;
-  padding: 20px;
-  background-color: #ffffff;
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  text-align: center;
-}
-
-.vermuk-instruction {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 16px;
-}
-
-.vermuk-frame-wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 16px;
-}
-
-.vermuk-frame {
-  width: 220px;
-  height: 220px;
-  border-radius: 50%;
-  border: 5px solid #ef4444;
-  overflow: hidden;
-  position: relative;
-  box-sizing: border-box;
-  transition: border-color 0.3s ease;
-  background-color: #000000;
-}
-
-.vermuk-frame video, .vermuk-frame img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scaleX(-1);
-}
-
+/* --- TAMBAHAN CSS VERMUK SAJA --- */
+.vermuk-card { max-width: 320px; margin: 0 auto; text-align: center; }
+.vermuk-instruction { font-size: 14px; font-weight: bold; margin-bottom: 10px; }
+.vermuk-frame-wrapper { display: flex; justify-content: center; }
+.vermuk-frame { width: 200px; height: 200px; border-radius: 50%; border: 4px solid #ef4444; overflow: hidden; position: relative; background: #000; }
+.vermuk-frame video, .vermuk-frame img { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 .vermuk-frame.status-red { border-color: #ef4444; }
 .vermuk-frame.status-yellow { border-color: #f59e0b; }
 .vermuk-frame.status-green { border-color: #10b981; }
-
-.vermuk-feedback {
-  font-size: 0.9rem;
-  font-weight: 600;
-  min-height: 24px;
-  margin-bottom: 12px;
-}
-
+.vermuk-feedback { font-weight: bold; margin-top: 10px; font-size: 14px; }
 .status-text-red { color: #dc2626; }
 .status-text-yellow { color: #d97706; }
 .status-text-green { color: #059669; }
 
-/* ==========================================================================
-   5. ADMIN TABLES & REKAP LAPORAN
-   ========================================================================== */
-.table-responsive {
-  width: 100%;
-  overflow-x: auto;
-  margin-top: 16px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: #ffffff;
-}
-
-th, td {
-  padding: 12px 14px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-  font-size: 0.9rem;
-}
-
-th {
-  background-color: #f9fafb;
-  font-weight: 600;
-  color: #374151;
-}
-
-tr:hover {
-  background-color: #f3f4f6;
-}
-
-.img-thumbnail {
-  width: 50px;
-  height: 50px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #10b981;
-}
