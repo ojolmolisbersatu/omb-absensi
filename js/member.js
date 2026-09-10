@@ -1,183 +1,252 @@
-// Variable penampung data event & lokasi user
-let currentEvents = [];
-let userLocation = null;
+/* ==========================================================================
+   OMB ABSENSI V1 — Halaman member (tanpa login)
+   ========================================================================== */
+const $ = (id) => document.getElementById(id);
 
-// Inisialisasi saat halaman selesai dimuat
-document.addEventListener('DOMContentLoaded', async () => {
-  await checkAuth();
-  await loadActiveEvents();
-  initGeolocation();
-  setupFormListener();
-});
+let sessionData = null;
+let eventData = null;
+let pickedMember = null; // {id_anggota, nama}
+let gpsResultData = null; // {latitude, longitude, accuracy, distance, valid}
+let photoFile = null;
 
-// 1. Cek Autentikasi Member
-async function checkAuth() {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error || !user) {
-    alert('Anda belum login. Silakan login terlebih dahulu.');
-    window.location.href = 'index.html';
-  }
-}
-
-// 2. Ambil Daftar Event Aktif Hari Ini (Tanpa Session)
-async function loadActiveEvents() {
-  const eventSelect = document.getElementById('eventSelect');
-  eventSelect.innerHTML = '<option value="">-- Memuat Event... --</option>';
-
-  const now = new Date().toISOString();
-
-  // Query langsung ke tabel events
-  const { data: events, error } = await supabase
-    .from('events')
-    .select('*')
-    .lte('start_time', now) // event yang sudah/sedang mulai
-    .gte('end_time', now)   // event yang belum selesai
-    .order('start_time', { ascending: true });
-
-  if (error) {
-    console.error('Gagal mengambil data event:', error);
-    eventSelect.innerHTML = '<option value="">Gagal memuat event</option>';
-    return;
-  }
-
-  currentEvents = events || [];
-
-  if (currentEvents.length === 0) {
-    eventSelect.innerHTML = '<option value="">Tidak ada event aktif saat ini</option>';
-    return;
-  }
-
-  // Populate dropdown event
-  eventSelect.innerHTML = '<option value="">-- Pilih Event --</option>';
-  currentEvents.forEach(evt => {
-    const opt = document.createElement('option');
-    opt.value = evt.id;
-    opt.textContent = `${evt.title || evt.name} (${formatTime(evt.start_time)} - ${formatTime(evt.end_time)})`;
-    eventSelect.appendChild(opt);
-  });
-}
-
-// Helper Format Jam
-function formatTime(isoString) {
-  if (!isoString) return '';
-  const date = new Date(isoString);
-  return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-}
-
-// 3. Ambil Lokasi Real-time Pengguna
-function initGeolocation() {
-  const locStatus = document.getElementById('locationStatus');
-
-  if (!navigator.geolocation) {
-    locStatus.innerText = 'Geolocation tidak didukung oleh browser Anda.';
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      userLocation = {
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude
-      };
-      locStatus.innerText = `Lokasi terdeteksi: (${userLocation.latitude.toFixed(5)}, ${userLocation.longitude.toFixed(5)})`;
-      locStatus.style.color = '#10b981';
-    },
-    (error) => {
-      console.error('Gagal mengambil lokasi:', error);
-      locStatus.innerText = 'Gagal mendapatkan lokasi. Pastikan GPS aktif.';
-      locStatus.style.color = '#ef4444';
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  );
-}
-
-// 4. Perhitungan Jarak (Haversine Formula) dalam Meter
-function calculateDistance(lat1, lon1, lat2, lon2) {
-  const R = 6371000; // Radius bumi dalam meter
-  const dLat = (lat2 - lat1) * Math.PI / 180;
-  const dLon = (lon2 - lon1) * Math.PI / 180;
-  const a = 
-    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
-    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+function haversineMeters(lat1, lon1, lat2, lon2) {
+  const R = 6371000;
+  const toRad = (x) => (x * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   return R * c;
 }
 
-// 5. Submit Absensi
-function setupFormListener() {
-  const btnSubmit = document.getElementById('btnSubmitAbsen');
+function updateSubmitState() {
+  $('submitBtn').disabled = !(pickedMember && gpsResultData && gpsResultData.valid && photoFile);
+}
 
-  btnSubmit.addEventListener('click', async () => {
-    const eventSelect = document.getElementById('eventSelect');
-    const selectedEventId = eventSelect.value;
+async function loadSession() {
+  const sessionId = new URLSearchParams(location.search).get('session');
+  if (!sessionId) {
+    await loadActiveSessionList();
+    return;
+  }
+  const { data: session, error: err1 } = await supabaseClient
+    .from('event_sessions')
+    .select('*')
+    .eq('id', sessionId)
+    .single();
+  if (err1 || !session) {
+    $('eventTitle').textContent = 'Sesi tidak ditemukan';
+    showMessage($('message'), 'Sesi absensi tidak ditemukan atau sudah tidak aktif.', 'error');
+    return;
+  }
+  sessionData = session;
 
-    // A. Validasi Event
-    if (!selectedEventId) {
-      alert('Pilih event terlebih dahulu!');
-      return;
-    }
+  const { data: ev } = await supabaseClient.from('events').select('*').eq('id', session.event_id).single();
+  eventData = ev || null;
 
-    // B. Validasi Lokasi User
-    if (!userLocation) {
-      alert('Lokasi Anda belum terdeteksi. Izinkan akses GPS terlebih dahulu.');
-      return;
-    }
+  $('eventTitle').textContent = (eventData ? eventData.name : 'Absensi') + ' — ' + session.name;
+  $('eventSub').textContent = `${session.location_name || '-'} · Radius ${session.radius_meter ?? '-'} m`;
 
-    // C. Validasi Foto Vermuk (Base64 dari vermuk-camera.js)
-    if (typeof capturedImageBase64 === 'undefined' || !capturedImageBase64) {
-      alert('Silakan ambil foto verifikasi wajah terlebih dahulu.');
-      return;
-    }
+  if (session.status !== 'active') {
+    $('sessionClosed').classList.remove('hidden');
+    return;
+  }
+  $('formArea').classList.remove('hidden');
+}
 
-    // D. Validasi Radius Lokasi Event (jika event memiliki batasan lokasi)
-    const selectedEvent = currentEvents.find(e => e.id === selectedEventId);
-    if (selectedEvent && selectedEvent.latitude && selectedEvent.longitude) {
-      const distance = calculateDistance(
-        userLocation.latitude,
-        userLocation.longitude,
-        selectedEvent.latitude,
-        selectedEvent.longitude
-      );
+async function loadActiveSessionList() {
+  $('eventTitle').textContent = 'Absensi OMB';
+  $('eventSub').textContent = 'Pilih sesi yang sedang berlangsung untuk melakukan absensi.';
+  $('sessionPicker').classList.remove('hidden');
 
-      const maxRadius = selectedEvent.radius_meters || 100;
+  const { data: sessionsData, error } = await supabaseClient
+    .from('event_sessions')
+    .select('*')
+    .eq('status', 'active')
+    .order('start_time');
 
-      if (distance > maxRadius) {
-        alert(`Anda berada di luar radius event! Jarak Anda: ${Math.round(distance)}m (Maksimal: ${maxRadius}m)`);
-        return;
-      }
-    }
+  if (error) {
+    $('activeSessionList').innerHTML = `<div class="empty">Gagal memuat sesi aktif: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  if (!sessionsData || !sessionsData.length) {
+    $('activeSessionList').innerHTML = '<div class="empty">Tidak ada sesi absensi yang aktif saat ini.</div>';
+    return;
+  }
 
-    // E. Proses Simpan ke Database Supabase
-    btnSubmit.disabled = true;
-    btnSubmit.innerText = 'Mencatat Kehadiran...';
+  const eventIds = [...new Set(sessionsData.map((s) => s.event_id))];
+  const { data: eventsData } = await supabaseClient.from('events').select('*').in('id', eventIds);
+  const eventMap = {};
+  (eventsData || []).forEach((e) => (eventMap[e.id] = e));
 
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
+  $('activeSessionList').innerHTML = sessionsData
+    .map((s) => {
+      const ev = eventMap[s.event_id];
+      return `<div class="member-item" onclick="location.href='?session=${s.id}'">
+        <span>${escapeHtml(ev ? ev.name : 'Event')} — ${escapeHtml(s.name)}</span>
+        <span class="id">${escapeHtml(s.location_name || '-')}</span>
+      </div>`;
+    })
+    .join('');
+}
 
-      const { data, error } = await supabase
-        .from('attendance')
-        .insert([
-          {
-            event_id: selectedEventId,
-            user_id: user.id,
-            photo_url: capturedImageBase64, // Menyimpan foto Base64 langsung
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
-            created_at: new Date().toISOString()
-          }
-        ]);
+async function searchMember(q) {
+  const box = $('searchResults');
+  if (!q || q.trim().length < 2) {
+    box.innerHTML = '';
+    return;
+  }
+  const { data, error } = await supabaseClient
+    .from('anggota_omb_public')
+    .select('*')
+    .or(`nama.ilike.%${q}%,nama_panggilan.ilike.%${q}%,id_anggota.ilike.%${q}%`)
+    .limit(8);
+  if (error) {
+    box.innerHTML = `<div class="empty">Gagal mencari data: ${escapeHtml(error.message)}</div>`;
+    return;
+  }
+  const results = data || [];
+  box.innerHTML = results.length
+    ? results
+        .map(
+          (m) =>
+            `<div class="member-item" data-id="${escapeHtml(m.id_anggota)}" data-nama="${escapeHtml(m.nama)}">
+              <span>${escapeHtml(m.nama)}${m.nama_panggilan ? ' (' + escapeHtml(m.nama_panggilan) + ')' : ''}</span>
+              <span class="id">${escapeHtml(m.id_anggota)}</span>
+            </div>`
+        )
+        .join('')
+    : '<div class="empty">Tidak ditemukan.</div>';
 
-      if (error) throw error;
-
-      alert('Absensi berhasil dicatat!');
-      window.location.reload();
-
-    } catch (err) {
-      console.error('Error submit absensi:', err);
-      alert('Gagal mencatat absensi: ' + err.message);
-      btnSubmit.disabled = false;
-      btnSubmit.innerText = 'Kirim Kehadiran';
-    }
+  box.querySelectorAll('.member-item').forEach((el) => {
+    el.addEventListener('click', () => {
+      pickedMember = { id_anggota: el.dataset.id, nama: el.dataset.nama };
+      renderPickedMember();
+      box.innerHTML = '';
+      $('memberSearch').value = '';
+      updateSubmitState();
+    });
   });
 }
+
+function renderPickedMember() {
+  const box = $('pickedMemberBox');
+  if (!pickedMember) {
+    box.innerHTML = '';
+    return;
+  }
+  box.innerHTML = `<div class="picked-member"><span>✅ ${escapeHtml(pickedMember.nama)} (${escapeHtml(
+    pickedMember.id_anggota
+  )})</span><button type="button" id="clearMemberBtn">Ganti</button></div>`;
+  $('clearMemberBtn').addEventListener('click', () => {
+    pickedMember = null;
+    renderPickedMember();
+    updateSubmitState();
+  });
+}
+
+function checkLocation() {
+  const resultEl = $('gpsResult');
+  const btn = $('checkLocationBtn');
+  if (!navigator.geolocation) {
+    showMessage(resultEl, 'Geolocation tidak didukung browser ini.', 'error');
+    resultEl.classList.remove('hidden');
+    return;
+  }
+  btn.disabled = true;
+  btn.textContent = 'Mencari lokasi...';
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      const targetLat = Number(sessionData.latitude);
+      const targetLng = Number(sessionData.longitude);
+      const radius = Number(sessionData.radius_meter) || 0;
+      let distance = null;
+      let valid = false;
+      if (!Number.isNaN(targetLat) && !Number.isNaN(targetLng)) {
+        distance = haversineMeters(latitude, longitude, targetLat, targetLng);
+        valid = distance <= radius;
+      }
+      gpsResultData = { latitude, longitude, accuracy, distance, valid };
+      resultEl.classList.remove('hidden');
+      resultEl.innerHTML = `
+        <div>Akurasi GPS: ± ${Math.round(accuracy)} meter</div>
+        ${
+          distance !== null
+            ? `<div>Jarak ke lokasi: ${Math.round(distance)} meter (radius diizinkan: ${radius} m)</div>
+               <div class="${valid ? 'valid' : 'invalid'}">${valid ? '✅ Lokasi valid, dalam radius absensi' : '❌ Anda berada di luar radius absensi'}</div>`
+            : `<div class="invalid">⚠️ Lokasi sesi belum diatur oleh admin.</div>`
+        }
+      `;
+      btn.disabled = false;
+      btn.textContent = '📍 Cek Ulang Lokasi';
+      updateSubmitState();
+    },
+    (err) => {
+      resultEl.classList.remove('hidden');
+      showMessage(resultEl, 'Gagal mengambil lokasi: ' + err.message, 'error');
+      btn.disabled = false;
+      btn.textContent = '📍 Aktifkan GPS & Cek Lokasi';
+    },
+    { enableHighAccuracy: true, timeout: 12000 }
+  );
+}
+
+function handlePhotoChange(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  photoFile = file;
+  const preview = $('photoPreview');
+  preview.src = URL.createObjectURL(file);
+  preview.classList.remove('hidden');
+  updateSubmitState();
+}
+
+async function submitAttendance() {
+  const btn = $('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'MENGIRIM...';
+  try {
+    const folderName = eventData ? `${eventData.name} - ${eventData.event_date}` : 'Lainnya';
+    const upload = await uploadPhotoToDrive(photoFile, pickedMember.id_anggota, folderName);
+    if (!upload.ok) throw new Error(upload.error || 'Upload foto gagal.');
+
+    const payload = {
+      event_id: sessionData.event_id,
+      session_id: sessionData.id,
+      member_id: pickedMember.id_anggota,
+      latitude: gpsResultData.latitude,
+      longitude: gpsResultData.longitude,
+      gps_accuracy: gpsResultData.accuracy,
+      distance_meter: gpsResultData.distance,
+      location_valid: gpsResultData.valid,
+      photo_drive_id: upload.file_id,
+      photo_drive_url: upload.view_url || upload.file_url,
+      status: 'hadir',
+      device_info: navigator.userAgent
+    };
+    const { error } = await supabaseClient.from('attendance').insert(payload);
+    if (error) throw error;
+
+    document.getElementById('formArea').innerHTML =
+      '<div class="notice success">✅ Absensi berhasil dikirim. Terima kasih!</div>';
+  } catch (err) {
+    showMessage($('message'), 'Gagal mengirim absensi: ' + (err.message || err), 'error');
+    btn.disabled = false;
+    btn.textContent = 'KIRIM ABSENSI';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadSession();
+  let searchTimer;
+  $('memberSearch').addEventListener('input', (e) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => searchMember(e.target.value), 300);
+  });
+  $('checkLocationBtn').addEventListener('click', checkLocation);
+  $('photoInput').addEventListener('change', handlePhotoChange);
+  $('submitBtn').addEventListener('click', submitAttendance);
+});

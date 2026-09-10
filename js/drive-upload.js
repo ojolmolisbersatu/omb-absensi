@@ -5,9 +5,10 @@ const UPLOAD_SECRET = 'PASTE_SECRET_KEY_DI_SINI';
 
 /**
  * Upload foto (File object dari <input type="file">) ke Google Drive.
- * Return: { ok, file_id, file_url, view_url } atau { ok:false, error }
+ * folderName: nama event, dipakai untuk mengelompokkan foto per-event otomatis.
+ * Return: { ok, file_id, file_url, view_url, folder_url } atau { ok:false, error }
  */
-async function uploadPhotoToDrive(file, fileNamePrefix) {
+async function uploadPhotoToDrive(file, fileNamePrefix, folderName) {
   if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.includes('PASTE_')) {
     return { ok: false, error: 'Upload foto belum dikonfigurasi (GAS_WEB_APP_URL kosong).' };
   }
@@ -19,7 +20,7 @@ async function uploadPhotoToDrive(file, fileNamePrefix) {
       method: 'POST',
       // text/plain menghindari CORS preflight OPTIONS yang tidak didukung Apps Script Web App
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({ secret: UPLOAD_SECRET, photoBase64: base64, fileName })
+      body: JSON.stringify({ secret: UPLOAD_SECRET, photoBase64: base64, fileName, folderName: folderName || 'Lainnya' })
     });
     const data = await res.json();
     return data;
